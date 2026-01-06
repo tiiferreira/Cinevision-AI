@@ -1,29 +1,48 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Header from './components/Header';
 import ImageUploader from './components/ImageUploader';
 import AnalysisResult from './components/AnalysisResult';
 import StoryInput from './components/StoryInput';
 import StoryboardResultComponent from './components/StoryboardResult';
-import { analyzeImageForCinema, generateStoryboardFromText } from './services/geminiService';
+import ApiKeyScreen from './components/ApiKeyScreen';
+import { analyzeImageForCinema, generateStoryboardFromText, hasApiKey, setApiKey } from './services/geminiService';
 import { AppState, CineAnalysisResult, StoryboardResult, ActiveTab } from './types';
 import { Sparkles, AlertCircle, Image as ImageIcon, BookOpen } from 'lucide-react';
 
 const App: React.FC = () => {
+  const [hasApiKeyConfigured, setHasApiKeyConfigured] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<ActiveTab>('image');
   const [appState, setAppState] = useState<AppState>(AppState.IDLE);
   
-  // Separate states for results to cache them when switching tabs
   const [currentImage, setCurrentImage] = useState<string | null>(null);
   const [imageResult, setImageResult] = useState<CineAnalysisResult | null>(null);
   const [storyResult, setStoryResult] = useState<StoryboardResult | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  useEffect(() => {
+    setHasApiKeyConfigured(hasApiKey());
+  }, []);
+
+  const handleApiKeySet = (apiKey: string) => {
+    setApiKey(apiKey);
+    setHasApiKeyConfigured(true);
+  };
+
+  const handleOpenSettings = () => {
+    if (window.confirm('Deseja alterar a API Key? Você precisará inserir uma nova chave.')) {
+      localStorage.removeItem('gemini_api_key');
+      setHasApiKeyConfigured(false);
+    }
+  };
+
+  if (!hasApiKeyConfigured) {
+    return <ApiKeyScreen onApiKeySet={handleApiKeySet} />;
+  }
+
   const handleTabChange = (tab: ActiveTab) => {
     setActiveTab(tab);
     setAppState(AppState.IDLE);
     setErrorMsg(null);
-    // Note: We keep the previous results in state, but reset appState to IDLE
-    // so the user sees the input again, unless they want to see result (optional UX improvement)
     if ((tab === 'image' && imageResult) || (tab === 'story' && storyResult)) {
         setAppState(AppState.SUCCESS);
     }
@@ -64,11 +83,10 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-cinema-900 text-white selection:bg-cinema-accent selection:text-black">
-      <Header />
+      <Header onSettingsClick={handleOpenSettings} />
 
       <main className="container mx-auto px-4 py-8">
         
-        {/* Hero Section */}
         <div className="text-center mb-8 space-y-4 max-w-2xl mx-auto">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tighter bg-gradient-to-r from-white via-gray-200 to-gray-500 bg-clip-text text-transparent">
             {activeTab === 'image' ? "Visão Cinematográfica" : "Roteiro para Cena"}
@@ -81,7 +99,6 @@ const App: React.FC = () => {
           </p>
         </div>
 
-        {/* Tab Switcher */}
         <div className="flex justify-center mb-10">
           <div className="bg-cinema-800 p-1 rounded-full border border-cinema-700 flex">
             <button
@@ -107,10 +124,8 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Content Area */}
         <div className="min-h-[400px]">
           
-          {/* Inputs (Show if IDLE or if we want to allow re-upload/re-submit while viewing result? Let's keep it simple: Show input if IDLE or Result exists but above result) */}
           <div className={`${appState === AppState.SUCCESS ? 'hidden md:block' : 'block'}`}>
             {activeTab === 'image' && (
                <ImageUploader 
@@ -127,7 +142,6 @@ const App: React.FC = () => {
             )}
           </div>
 
-          {/* Loading State */}
           {appState === AppState.ANALYZING && (
             <div className="flex flex-col items-center justify-center py-12 text-gray-500 animate-pulse">
               <Sparkles className="w-8 h-8 mb-4 text-cinema-accent" />
@@ -140,7 +154,6 @@ const App: React.FC = () => {
             </div>
           )}
 
-          {/* Error State */}
           {appState === AppState.ERROR && (
             <div className="max-w-md mx-auto p-4 bg-red-900/20 border border-red-800 rounded-lg flex items-center gap-3 text-red-200 mt-8">
               <AlertCircle className="w-5 h-5 flex-shrink-0" />
@@ -148,7 +161,6 @@ const App: React.FC = () => {
             </div>
           )}
 
-          {/* Results */}
           {appState === AppState.SUCCESS && (
             <div className="mt-8">
               {activeTab === 'image' && imageResult && (
