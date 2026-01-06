@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { Upload, Image as ImageIcon, Loader2, AlertCircle } from 'lucide-react';
 
 interface ImageUploaderProps {
   onImageSelected: (base64: string) => void;
@@ -8,6 +8,8 @@ interface ImageUploaderProps {
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelected, isLoading }) => {
   const [preview, setPreview] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [fileType, setFileType] = useState<'image' | 'video' | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -15,14 +17,40 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelected, isLoadin
     if (file) {
       processFile(file);
     }
+    e.target.value = '';
   };
 
   const processFile = (file: File) => {
+    setError(null);
+    
+    const maxSize = 20 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setError('Arquivo muito grande. Tamanho máximo: 20MB');
+      return;
+    }
+
+    const isImage = file.type.startsWith('image/');
+    const isVideo = file.type.startsWith('video/');
+    
+    if (!isImage && !isVideo) {
+      setError('Formato não suportado. Use imagens (JPG, PNG, WEBP) ou vídeos (MP4, WEBM)');
+      return;
+    }
+
+    setFileType(isImage ? 'image' : 'video');
+
     const reader = new FileReader();
+    reader.onerror = () => {
+      setError('Erro ao ler o arquivo. Tente novamente.');
+    };
     reader.onloadend = () => {
       const base64 = reader.result as string;
-      setPreview(base64);
-      onImageSelected(base64);
+      if (base64) {
+        setPreview(base64);
+        onImageSelected(base64);
+      } else {
+        setError('Erro ao processar o arquivo.');
+      }
     };
     reader.readAsDataURL(file);
   };
@@ -36,6 +64,16 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelected, isLoadin
     const file = e.dataTransfer.files?.[0];
     if (file) {
       processFile(file);
+    }
+  };
+
+  const handleClear = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setPreview(null);
+    setError(null);
+    setFileType(null);
+    if (inputRef.current) {
+      inputRef.current.value = '';
     }
   };
 
@@ -62,28 +100,55 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelected, isLoadin
           type="file"
           ref={inputRef}
           className="hidden"
-          accept="image/*"
+          accept="image/*,video/*"
           onChange={handleFileChange}
           disabled={isLoading}
         />
 
         {preview ? (
-          <img 
-            src={preview} 
-            alt="Preview" 
-            className="w-full h-full object-contain p-2"
-          />
+          <div className="relative w-full h-full">
+            {fileType === 'image' ? (
+              <img 
+                src={preview} 
+                alt="Preview" 
+                className="w-full h-full object-contain p-2"
+              />
+            ) : (
+              <video 
+                src={preview} 
+                className="w-full h-full object-contain p-2"
+                controls
+                muted
+              />
+            )}
+            {!isLoading && (
+              <button
+                onClick={handleClear}
+                className="absolute top-2 right-2 p-2 bg-cinema-900/80 hover:bg-cinema-900 rounded-full transition-colors"
+                title="Remover arquivo"
+              >
+                <span className="text-white text-xl">×</span>
+              </button>
+            )}
+          </div>
         ) : (
           <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4">
             <div className="p-4 rounded-full bg-cinema-800 mb-4">
                 <Upload className="w-8 h-8 text-cinema-accent" />
             </div>
             <p className="mb-2 text-lg font-semibold text-gray-200">
-              Clique ou arraste uma foto aqui
+              Clique ou arraste uma imagem ou vídeo aqui
             </p>
             <p className="text-sm text-gray-500">
-              PNG, JPG ou WEBP (Max 10MB)
+              Imagens: PNG, JPG, WEBP | Vídeos: MP4, WEBM (Max 20MB)
             </p>
+          </div>
+        )}
+
+        {error && (
+          <div className="mt-4 p-3 bg-red-900/20 border border-red-800 rounded-lg flex items-center gap-2 text-red-200 text-sm">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <p>{error}</p>
           </div>
         )}
 

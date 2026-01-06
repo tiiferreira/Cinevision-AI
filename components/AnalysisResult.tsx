@@ -9,13 +9,11 @@ interface AnalysisResultProps {
 const AnalysisResult: React.FC<AnalysisResultProps> = ({ data }) => {
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    // Could add a toast here ideally
   };
 
   return (
     <div className="w-full max-w-5xl mx-auto space-y-8 animate-fade-in pb-20">
       
-      {/* Cinematic Prompt Section */}
       <section className="bg-cinema-800 rounded-xl p-6 border border-cinema-700 shadow-xl">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -35,7 +33,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ data }) => {
       </section>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Camera Angles */}
         <section className="bg-cinema-800 rounded-xl p-6 border border-cinema-700 shadow-lg">
           <div className="flex items-center gap-2 mb-6">
             <Camera className="text-blue-400 w-5 h-5" />
@@ -53,7 +50,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ data }) => {
           </ul>
         </section>
 
-        {/* Lighting */}
         <section className="bg-cinema-800 rounded-xl p-6 border border-cinema-700 shadow-lg">
           <div className="flex items-center gap-2 mb-6">
             <Lightbulb className="text-yellow-400 w-5 h-5" />
@@ -72,7 +68,6 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ data }) => {
         </section>
       </div>
 
-      {/* Commercial Ideas */}
       <section>
         <div className="flex items-center gap-2 mb-6">
           <Clapperboard className="text-green-400 w-6 h-6" />

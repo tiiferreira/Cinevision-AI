@@ -1,9 +1,9 @@
 import React from 'react';
-import { StoryboardResult } from '../types';
+import { StoryboardResult as StoryboardResultType } from '../types';
 import { Copy, Film, Clapperboard, Check } from 'lucide-react';
 
 interface StoryboardResultProps {
-  data: StoryboardResult;
+  data: StoryboardResultType;
 }
 
 const JsonBlock: React.FC<{ json: any }> = ({ json }) => {
@@ -34,7 +34,7 @@ const JsonBlock: React.FC<{ json: any }> = ({ json }) => {
   );
 };
 
-const StoryboardResult: React.FC<StoryboardResultProps> = ({ data }) => {
+const StoryboardResultComponent: React.FC<StoryboardResultProps> = ({ data }) => {
   return (
     <div className="w-full max-w-4xl mx-auto space-y-8 animate-fade-in pb-20">
       
@@ -89,4 +89,4 @@ const StoryboardResult: React.FC<StoryboardResultProps> = ({ data }) => {
   );
 };
 
-export default StoryboardResult;
+export default StoryboardResultComponent;
