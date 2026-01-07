@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export interface ThemeColors {
   primary: string;
@@ -50,6 +50,8 @@ export const useTheme = () => {
 
   const currentColors = defaultThemes[theme] || defaultThemes.dark;
 
+  const prevThemeRef = useRef<string>(theme);
+
   useEffect(() => {
     const root = document.documentElement;
     
@@ -70,6 +72,15 @@ export const useTheme = () => {
     root.style.setProperty('--theme-secondary-rgb', hexToRgb(currentColors.secondary));
     
     sessionStorage.setItem('cinevision-theme', theme);
+    
+    if (prevThemeRef.current !== theme && prevThemeRef.current !== '') {
+      console.log('Tema mudou de', prevThemeRef.current, 'para', theme, '- Recarregando página...');
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
+    }
+    
+    prevThemeRef.current = theme;
   }, [theme, currentColors]);
 
   return {
