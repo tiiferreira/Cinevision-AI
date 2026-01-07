@@ -21,23 +21,17 @@ const ApiKeyScreen: React.FC<ApiKeyScreenProps> = ({ onApiKeySet }) => {
       return;
     }
 
-    if (trimmedKey.length < 20) {
+    if (trimmedKey.length < 10) {
       setError('A API key parece estar incompleta. Verifique e tente novamente.');
-      return;
-    }
-
-    if (!trimmedKey.startsWith('AIza') && trimmedKey.length < 30) {
-      setError('A API key não parece ter o formato correto. Verifique se copiou a chave completa.');
       return;
     }
 
     setIsLoading(true);
     
     try {
-      localStorage.setItem('gemini_api_key', trimmedKey);
+      localStorage.setItem('_k1', trimmedKey);
       onApiKeySet(trimmedKey);
     } catch (err) {
-      console.error('Erro ao salvar API key:', err);
       setError('Erro ao salvar a API key. Tente novamente.');
       setIsLoading(false);
     }
@@ -72,7 +66,7 @@ const ApiKeyScreen: React.FC<ApiKeyScreenProps> = ({ onApiKeySet }) => {
                   setApiKey(e.target.value);
                   setError(null);
                 }}
-                placeholder="AIza..."
+                placeholder="Cole sua API key aqui"
                 className="w-full px-4 py-3 bg-cinema-900 border border-cinema-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cinema-accent focus:ring-2 focus:ring-cinema-accent/20 transition-all"
                 disabled={isLoading}
                 autoFocus

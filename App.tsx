@@ -35,10 +35,6 @@ const App: React.FC = () => {
     }
   };
 
-  if (!hasApiKeyConfigured) {
-    return <ApiKeyScreen onApiKeySet={handleApiKeySet} />;
-  }
-
   const handleTabChange = (tab: ActiveTab) => {
     setActiveTab(tab);
     setAppState(AppState.IDLE);
@@ -71,15 +67,27 @@ const App: React.FC = () => {
     setStoryResult(null);
 
     try {
+      // Valida se a história não está vazia
+      if (!story || story.trim().length < 10) {
+        throw new Error("A história deve ter pelo menos 10 caracteres.");
+      }
+
       const data = await generateStoryboardFromText(story, currentImage, imageResult);
       setStoryResult(data);
       setAppState(AppState.SUCCESS);
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      console.error("Erro ao gerar storyboard:", err);
       setAppState(AppState.ERROR);
-      setErrorMsg("Falha ao gerar o storyboard. Tente encurtar a história ou tente novamente.");
+      
+      // Usa a mensagem de erro melhorada do serviço, ou uma mensagem padrão
+      const errorMessage = err?.message || "Falha ao gerar o storyboard. Tente encurtar a história ou tente novamente.";
+      setErrorMsg(errorMessage);
     }
   }, [currentImage, imageResult]);
+
+  if (!hasApiKeyConfigured) {
+    return <ApiKeyScreen onApiKeySet={handleApiKeySet} />;
+  }
 
   return (
     <div className="min-h-screen bg-cinema-900 text-white selection:bg-cinema-accent selection:text-black">
