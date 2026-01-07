@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Upload, Image as ImageIcon, Loader2, AlertCircle } from 'lucide-react';
+import { gsap } from 'gsap';
 
 interface ImageUploaderProps {
   onImageSelected: (base64: string) => void;
@@ -92,9 +93,39 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelected, isLoadin
         className={`
           relative flex flex-col items-center justify-center w-full h-64 sm:h-80
           border-2 border-dashed rounded-xl cursor-pointer transition-all duration-300 overflow-hidden
-          ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:border-cinema-accent hover:bg-cinema-800/50'}
-          ${preview ? 'border-cinema-accent' : 'border-cinema-700 bg-cinema-800/20'}
+          ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}
         `}
+        style={preview 
+          ? {
+              borderColor: 'var(--theme-accent)',
+              boxShadow: `0 0 30px rgba(var(--theme-accent-rgb), 0.3)`,
+              backgroundColor: 'rgba(var(--theme-secondary-rgb), 0.3)'
+            }
+          : {
+              borderColor: 'var(--theme-secondary)',
+              backgroundColor: 'rgba(var(--theme-secondary-rgb), 0.2)'
+            }
+        }
+        onMouseEnter={(e) => {
+          if (!isLoading && !preview) {
+            gsap.to(e.currentTarget, {
+              borderColor: 'var(--theme-accent)',
+              boxShadow: `0 0 20px rgba(var(--theme-accent-rgb), 0.2)`,
+              backgroundColor: 'rgba(var(--theme-secondary-rgb), 0.3)',
+              duration: 0.3
+            });
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!isLoading && !preview) {
+            gsap.to(e.currentTarget, {
+              borderColor: 'var(--theme-secondary)',
+              boxShadow: 'none',
+              backgroundColor: 'rgba(var(--theme-secondary-rgb), 0.2)',
+              duration: 0.3
+            });
+          }
+        }}
       >
         <input
           type="file"
@@ -133,13 +164,19 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelected, isLoadin
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4">
-            <div className="p-4 rounded-full bg-cinema-800 mb-4">
-                <Upload className="w-8 h-8 text-cinema-accent" />
+            <div 
+              className="p-4 rounded-full mb-4"
+              style={{
+                backgroundColor: 'rgba(var(--theme-secondary-rgb), 0.5)',
+                color: 'var(--theme-accent)'
+              }}
+            >
+                <Upload className="w-8 h-8" />
             </div>
-            <p className="mb-2 text-lg font-semibold text-gray-200">
+            <p className="mb-2 text-lg font-semibold" style={{ color: 'var(--theme-text)' }}>
               Clique ou arraste uma imagem ou vídeo aqui
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm" style={{ color: 'var(--theme-text)', opacity: 0.6 }}>
               Imagens: PNG, JPG, WEBP | Vídeos: MP4, WEBM (Max 20MB)
             </p>
           </div>

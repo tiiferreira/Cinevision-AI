@@ -26,27 +26,117 @@
       }
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js" defer></script>
     <style>
+      :root {
+        --theme-primary: #0a0a0a;
+        --theme-secondary: #171717;
+        --theme-accent: #f59e0b;
+        --theme-text: #e5e5e5;
+        --theme-background: #0a0a0a;
+        --theme-primary-rgb: 10, 10, 10;
+      }
+
       body {
         font-family: 'Inter', sans-serif;
-        background-color: #0a0a0a;
-        color: #e5e5e5;
+        background-color: var(--theme-background);
+        color: var(--theme-text);
+        transition: background-color 0.3s ease, color 0.3s ease;
       }
+
       /* Custom scrollbar */
       ::-webkit-scrollbar {
         width: 8px;
       }
       ::-webkit-scrollbar-track {
-        background: #171717; 
+        background: var(--theme-secondary); 
       }
       ::-webkit-scrollbar-thumb {
-        background: #404040; 
+        background: var(--theme-accent);
+        opacity: 0.5;
         border-radius: 4px;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: #525252; 
+        opacity: 0.8;
+      }
+
+      /* Futuristic effects */
+      .glow-effect {
+        box-shadow: 0 0 20px rgba(var(--theme-accent-rgb), 0.3);
+      }
+
+      .text-glow {
+        text-shadow: 0 0 10px var(--theme-accent);
+      }
+
+      /* Animated gradient background */
+      @keyframes gradient-shift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+      }
+
+      .futuristic-bg {
+        background: linear-gradient(-45deg, 
+          var(--theme-background), 
+          var(--theme-secondary), 
+          var(--theme-background), 
+          var(--theme-secondary)
+        );
+        background-size: 400% 400%;
+        animation: gradient-shift 15s ease infinite;
+      }
+
+      /* Scan line effect */
+      @keyframes scan {
+        0% { transform: translateY(-100%); }
+        100% { transform: translateY(100vh); }
+      }
+
+      .scan-line {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(to right, 
+          transparent, 
+          var(--theme-accent), 
+          transparent
+        );
+        opacity: 0.1;
+        animation: scan 8s linear infinite;
+        pointer-events: none;
+        z-index: 9999;
       }
     </style>
+    <script>
+      (function() {
+        const savedTheme = sessionStorage.getItem('cinevision-theme') || 'dark';
+        const themes = {
+          dark: { primary: '#0a0a0a', secondary: '#171717', accent: '#f59e0b', text: '#e5e5e5', background: '#0a0a0a' },
+          cyber: { primary: '#0a0a0f', secondary: '#1a1a2e', accent: '#00f5ff', text: '#e0e0e0', background: '#0a0a0f' },
+          neon: { primary: '#0d0d0d', secondary: '#1a1a1a', accent: '#ff00ff', text: '#ffffff', background: '#0d0d0d' },
+          matrix: { primary: '#000000', secondary: '#0a0a0a', accent: '#00ff00', text: '#00ff00', background: '#000000' }
+        };
+        const theme = themes[savedTheme] || themes.dark;
+        const root = document.documentElement;
+        root.style.setProperty('--theme-primary', theme.primary);
+        root.style.setProperty('--theme-secondary', theme.secondary);
+        root.style.setProperty('--theme-accent', theme.accent);
+        root.style.setProperty('--theme-text', theme.text);
+        root.style.setProperty('--theme-background', theme.background);
+        const hexToRgb = (hex) => {
+          const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+          return result 
+            ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
+            : '0, 0, 0';
+        };
+        root.style.setProperty('--theme-accent-rgb', hexToRgb(theme.accent));
+        root.style.setProperty('--theme-secondary-rgb', hexToRgb(theme.secondary));
+        root.style.setProperty('--theme-primary-rgb', theme.primary.match(/\d+/g)?.slice(0, 3).join(', ') || '10, 10, 10');
+      })();
+    </script>
 </head>
   <body>
     <div id="root"></div>
